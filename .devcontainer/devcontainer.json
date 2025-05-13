@@ -1,0 +1,22 @@
+// filepath: .devcontainer/devcontainer.json
+// ...existing code...
+{
+    "name": "BASIL Multi-container Environment",
+    // Replace 'build' configuration with 'dockerComposeFile'
+    "dockerComposeFile": [
+        "../docker-compose.yml" // Path relative to this devcontainer.json file
+    ],
+    "service": "app", // VS Code will attach to the 'app' service
+    "workspaceFolder": "/workspaces/BASIL", // Must match the mount path in docker-compose.yml
+
+    // Features to add to the dev container. More info: https://containers.dev/features.
+    // "features": {},
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // These ports are from the services defined in docker-compose.yml.
+    "forwardPorts": [9000, 5000] // Forward app's port 9000 and api's port 5000
+
+    // Configure tool-specific properties.
+    // "customizations": {},
+    // "remoteUser": "root"
+}

@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile-app
+      args:
+        # Ensure the app can reach the API service via its Docker Compose service name ('api')
+        API_ENDPOINT: http://localhost:5000
+        APP_PORT: 9000
+    ports:
+      - "9000:9000"
+    volumes:
+      # Mounts the project directory into the service.
+      # VS Code will use this path as workspaceFolder.
+      - .:/workspaces/BASIL:cached
+    # The dev container will override the entrypoint for this service if it's the one VS Code attaches to.
+
+  api:
+    build:
+      context: .
+      # You can choose Containerfile-api-debian or Containerfile-api-fedora
+      dockerfile: Containerfile-api-debian
+      args:
+        API_PORT: 5000
+        # ADMIN_PASSWORD: admin # Default is 'admin' in Containerfile-api-fedora, assuming similar for debian
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount project directory for API development/access as well
+      - .:/workspaces/BASIL:cached
+      # Define persistent volumes as mentioned in your documentation
+      - basil-db-vol:/BASIL-API/db # Adjust path if different in Containerfile-api-debian
+      - basil-ssh-keys-vol:/root/.ssh # Standard path for root user's ssh keys
+      - basil-tmt-logs-vol:/var/tmp # For logs (e.g., gunicorn, tmt)
+      - basil-user-files-vol:/BASIL-API/api/user-files # Adjust path if different
+      # - basil-configs-vol:/path/to/configs/in/api # If basil-configs-vol is used by API
+
+volumes:
+  basil-db-vol:
+  basil-ssh-keys-vol:
+  basil-tmt-logs-vol:
+  basil-user-files-vol:
+  # basil-configs-vol: # Define if used
