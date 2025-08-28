@@ -5,6 +5,8 @@ import {
   CodeBlock,
   CodeBlockCode,
   Divider,
+  Gallery,
+  GalleryItem,
   Hint,
   HintBody,
   Label,
@@ -24,6 +26,7 @@ import InfoCircleIcon from '@patternfly/react-icons/dist/esm/icons/info-circle-i
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon'
 import { TestRunBugForm } from '../Form/TestRunBugForm'
 import { useAuth } from '../../User/AuthProvider'
+import { AutoRefresh } from '@app/Common/AutoRefresh/AutoRefresh'
 
 export interface TestResultDetailsModalProps {
   api
@@ -32,6 +35,7 @@ export interface TestResultDetailsModalProps {
   parentType
   setModalShowState
   setTestResultsModalShowState
+  loadTestResults
   currentTestResult
 }
 
@@ -42,6 +46,7 @@ export const TestResultDetailsModal: React.FunctionComponent<TestResultDetailsMo
   parentType,
   setModalShowState,
   setTestResultsModalShowState,
+  loadTestResults,
   currentTestResult
 }: TestResultDetailsModalProps) => {
   const auth = useAuth()
@@ -102,7 +107,7 @@ export const TestResultDetailsModal: React.FunctionComponent<TestResultDetailsMo
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        setSelectedTestResultArtifacts(data['artifacts'])
+        setSelectedTestResultArtifacts(data['artifacts'] ? data['artifacts'].sort() : [])
         setSelectedTestResultLog(data['log'])
         setSelectedTestResultLogExec(data['log_exec'])
         setSelectedTestResultReport(data['report'])
@@ -148,7 +153,7 @@ export const TestResultDetailsModal: React.FunctionComponent<TestResultDetailsMo
         tabIndex={0}
         variant={ModalVariant.large}
         title='Test Result Details'
-        description={``}
+        description={<AutoRefresh loadRows={loadTestResults} showCountdown={true} />}
         isOpen={isModalOpen}
         onClose={handleModalToggle}
       >
@@ -398,6 +403,7 @@ export const TestResultDetailsModal: React.FunctionComponent<TestResultDetailsMo
         </TabContent>
         <TabContent eventKey={1} id='tabContentTestResultLogSection' ref={testRunDetailsLogRef} hidden={1 !== activeTabKey}>
           <TabContentBody hasPadding>
+            <AutoRefresh loadRows={loadCurrentTestRunLog} showCountdown={false} />
             <TextContent>
               <Text component={TextVariants.h3}>Test Run {currentTestResult.id}</Text>
             </TextContent>
@@ -417,12 +423,17 @@ export const TestResultDetailsModal: React.FunctionComponent<TestResultDetailsMo
         </TabContent>
         <TabContent eventKey={3} id='tabContentTestResultArtifacts' ref={testRunArtifactsRef} hidden={3 !== activeTabKey}>
           <TabContentBody hasPadding>
-            {(selectedTestResultArtifacts &&
-              selectedTestResultArtifacts.map((artifact, index) => (
-                <Button key={index} component='a' href={getArtifactUrl(artifact)} target='_blank' variant='link'>
-                  {artifact}
-                </Button>
-              ))) || (
+            {selectedTestResultArtifacts ? (
+              <Gallery hasGutter minWidths={{ default: '100px', md: '200px' }}>
+                {selectedTestResultArtifacts.map((artifact, index) => (
+                  <GalleryItem key={'artifact-' + index}>
+                    <Text component={TextVariants.a} href={getArtifactUrl(artifact)}>
+                      {artifact}
+                    </Text>
+                  </GalleryItem>
+                ))}
+              </Gallery>
+            ) : (
               <TextContent>
                 <Text component={TextVariants.p}>empty</Text>
               </TextContent>

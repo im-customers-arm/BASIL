@@ -154,6 +154,7 @@ export const SwRequirementSearch: React.FunctionComponent<SwRequirementSearchPro
     }
 
     const data = {
+      'api-id': api.id,
       'sw-requirement': { id: sw_requirement_id },
       section: modalSection,
       offset: modalOffset,
@@ -172,8 +173,6 @@ export const SwRequirementSearch: React.FunctionComponent<SwRequirementSearchPro
       data['relation-id'] = parentData.relation_id
       data['relation-to'] = parentRelatedToType
       data['parent-sw-requirement'] = { id: parentData[Constants._SR_]['id'] }
-    } else {
-      data['api-id'] = api.id
     }
 
     let status: number = 0

@@ -647,7 +647,7 @@ const MappingPageSection: React.FunctionComponent<MappingPageSectionProps> = ({
         modalShowState={usageModalShowState}
       />
       <MappingCommentModal
-        //api={api}
+        api={api}
         modalDescription={modalDescription}
         modalTitle={modalTitle}
         relationData={modalRelationData}
@@ -686,17 +686,11 @@ const MappingPageSection: React.FunctionComponent<MappingPageSectionProps> = ({
         api={api}
         setModalShowState={setTestResultsModalShowState}
         modalShowState={testResultsModalShowState}
+        testResultDetailsModalShowState={testResultDetailsModalShowState}
         setTestResultDetailsModalShowState={setTestResultDetailsModalShowState}
-        setCurrentTestResult={setCurrentTestResult}
-        modalRelationData={modalRelationData}
-        parentType={modalParentType}
-      />
-      <TestResultDetailsModal
-        api={api}
-        setModalShowState={setTestResultDetailsModalShowState}
-        modalShowState={testResultDetailsModalShowState}
         setTestResultsModalShowState={setTestResultsModalShowState}
         currentTestResult={currentTestResult}
+        setCurrentTestResult={setCurrentTestResult}
         modalRelationData={modalRelationData}
         parentType={modalParentType}
       />

@@ -13,11 +13,13 @@ import {
   Tab,
   TabContent,
   TabContentBody,
-  TabTitleText
+  TabTitleText,
+  Icon
 } from '@patternfly/react-core'
 import * as Constants from '@app/Constants/constants'
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table'
 import { useAuth } from '@app/User/AuthProvider'
+import { PendingIcon } from '@patternfly/react-icons'
 
 export interface ManageUserPermissionsProps {
   api
@@ -27,7 +29,7 @@ export interface ManageUserPermissionsProps {
 
 interface UserPermissionInterface {
   id: number
-  email: string
+  username: string
   enabled: number
   role: string
   permissions: string
@@ -47,8 +49,6 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
   setModalShowState
 }: ManageUserPermissionsProps) => {
   const auth = useAuth()
-  const UNSET_USER_EMAIL = ''
-  const UNSET_USER_ROLE = ''
   const _READ = 'r'
   const _WRITE = 'w'
   const _EDIT = 'e'
@@ -57,7 +57,7 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
   let usersPermissionsDataLoaded = React.useRef<boolean>(false)
   let userApisDataLoaded = React.useRef<boolean>(false)
 
-  const [userEmailSearchValue, setUserEmailSearchValue] = React.useState('')
+  const [userSearchValue, setUserSearchValue] = React.useState('')
   const [userApiSearchValue, setUserApiSearchValue] = React.useState('')
   const [users, setUsers] = React.useState<UserPermissionInterface[]>([])
   const [userApis, setUserApis] = React.useState<UserApiInterface[]>([])
@@ -145,8 +145,8 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
     setAllUserApisSelected(allUserApis)
   }, [userApis])
 
-  const onChangeUserEmailSearchValue = (value) => {
-    setUserEmailSearchValue(value.trim())
+  const onChangeUserSearchValue = (value) => {
+    setUserSearchValue(value.trim())
   }
 
   const onChangeUserApiSearchValue = (value) => {
@@ -194,7 +194,7 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
 
   const loadUsers = () => {
     let response_data
-    const search_string = userEmailSearchValue.trim()
+    const search_string = userSearchValue.trim()
     let url
 
     if (search_string == auth.userEmai) {
@@ -204,7 +204,7 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
 
     url = Constants.API_BASE_URL + Constants.API_USER_PERMISSIONS_API_ENDPOINT + '?api-id=' + api.id
     url += '&user-id=' + auth.userId + '&token=' + auth.token
-    url += '&search=' + userEmailSearchValue
+    url += '&search=' + userSearchValue
     fetch(url, {
       method: 'GET',
       headers: Constants.JSON_HEADER
@@ -280,7 +280,7 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
     let response_data
 
     const url = Constants.API_BASE_URL + Constants.API_USER_PERMISSIONS_API_ENDPOINT
-    const data = { 'api-id': api.id, 'user-id': auth.userId, token: auth.token, email: userEmailSearchValue, permissions: users }
+    const data = { 'api-id': api.id, 'user-id': auth.userId, token: auth.token, search: userSearchValue, permissions: users }
     fetch(url, {
       method: 'PUT',
       headers: Constants.JSON_HEADER,
@@ -304,7 +304,7 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
       })
   }
 
-  const handleUserEmailSearchKeyPress = (event) => {
+  const handleUserSearchKeyPress = (event) => {
     if (event.key === 'Enter') {
       loadUsers()
     }
@@ -449,11 +449,11 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
             <Flex>
               <FlexItem>
                 <SearchInput
-                  placeholder='Search User by email address'
-                  value={userEmailSearchValue}
-                  onChange={(_event, value) => onChangeUserEmailSearchValue(value)}
-                  onClear={() => onChangeUserEmailSearchValue('')}
-                  onKeyUp={handleUserEmailSearchKeyPress}
+                  placeholder='Search User'
+                  value={userSearchValue}
+                  onChange={(_event, value) => onChangeUserSearchValue(value)}
+                  onClear={() => onChangeUserSearchValue('')}
+                  onKeyUp={handleUserSearchKeyPress}
                   style={{ width: '400px' }}
                 />
               </FlexItem>
@@ -517,8 +517,21 @@ export const APIManageUserPermissionsModal: React.FunctionComponent<ManageUserPe
                     {users
                       ? users.map((userPermission, rowIndex) => (
                           <Tr key={rowIndex}>
-                            <Td dataLabel='user'>{userPermission['email']}</Td>
-                            <Td dataLabel='user'>{userPermission['role']}</Td>
+                            <Td dataLabel='username'>
+                              <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
+                                <FlexItem>{userPermission['username']}</FlexItem>
+                                <FlexItem>
+                                  {userPermission?.['write_permission_request'] === 1 ? (
+                                    <Icon status='warning'>
+                                      <PendingIcon title='User requested write permission' />
+                                    </Icon>
+                                  ) : (
+                                    ''
+                                  )}
+                                </FlexItem>
+                              </Flex>
+                            </Td>
+                            <Td dataLabel='role'>{userPermission['role']}</Td>
                             <Td
                               select={{
                                 rowIndex,

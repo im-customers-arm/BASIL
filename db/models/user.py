@@ -43,17 +43,17 @@ class UserModel(Base):
                f"username={self.username!r}, " \
                f"email={self.email!r}, " \
                f"enabled={self.enabled!r}, " \
-               f"role={self.role!r}"
+               f"role={self.role!r})"
 
     def as_dict(self, full_data=False, db_session=None):
         _dict = {"id": self.id,
                  "username": self.username,
-                 "email": self.email,
                  "enabled": self.enabled,
                  "role": self.role,
                  "api_notifications": self.api_notifications}
 
         if full_data:
+            _dict["email"] = self.email
             _dict["created_at"] = self.created_at.strftime(Base.dt_format_str)
             _dict["updated_at"] = self.updated_at.strftime(Base.dt_format_str)
         return _dict

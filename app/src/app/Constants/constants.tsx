@@ -1,4 +1,5 @@
 export const API_BASE_URL = 'http://localhost:5000'
+export const BASIL_VERSION = '1.7.3'
 export const TESTING_FARM_COMPOSES_URL = 'https://api.dev.testing-farm.io/v0.1/composes'
 export const force_reload = true
 
@@ -22,10 +23,12 @@ export const _TSs = 'test-specifications'
 export const _TS_ = 'test_specification'
 export const _TSs_ = 'test_specifications'
 
+export const NO_SECTION_SELECTED_MESSAGE = 'No section selected, please select one from the `Mapping Section` tab.'
 export const UNVALID_REF_DOCUMENT_SECTION_MESSAGE =
   'Section of the Reference Document is mandatory. Open the Mapping Section tab to select it.'
 export const MODAL_WIDTH = '80%'
 
+export const REFRESH_INTERVAL = 60 // seconds
 export const DEFAULT_VIEW = _SRs
 export const DEFAULT_PER_PAGE = 10
 export type validate = 'success' | 'warning' | 'error' | 'error2' | 'default' | 'indeterminate' | 'undefined'
@@ -43,6 +46,12 @@ export const API_ADMIN_RESET_USER_PASSWORD_ENDPOINT = '/admin/reset-user-passwor
 export const API_SW_REQUIREMENT_IMPORT_ENDPOINT = '/import/sw-requirements'
 export const API_TEST_CASE_IMPORT_GENERATE_JSON_ENDPOINT = '/import/test-cases-generate-json'
 export const API_TEST_CASE_IMPORT_ENDPOINT = '/import/test-cases'
+export const API_REQUEST_WRITE_PERMISSION_ENDPOINT = '/apis/write-permission-request'
+export const API_AI_HEALTH_CHECK_ENDPOINT = '/ai/health-check'
+export const API_AI_SUGGEST_SW_REQ_METADATA_ENDPOINT = '/ai/suggest/sw-requirement/metadata'
+export const API_AI_SUGGEST_TEST_CASE_IMPLEMENTATION_ENDPOINT = '/ai/suggest/test-case/implementation'
+export const API_AI_SUGGEST_TEST_CASE_METADATA_ENDPOINT = '/ai/suggest/test-case/metadata'
+export const API_AI_SUGGEST_TEST_SPEC_METADATA_ENDPOINT = '/ai/suggest/test-specification/metadata'
 
 export const JSON_HEADER = {
   Accept: 'application/json',
@@ -264,6 +273,23 @@ export const loadFileContent = (_auth, _filename, _setMessage, _setContent) => {
     })
 }
 
+export async function checkEndpoint(urlToCheck, setIsUrlAvailable) {
+  try {
+    const response = await fetch(urlToCheck)
+    setIsUrlAvailable(response.ok) // true if status is 2xx
+  } catch (error) {
+    console.error('Error checking endpoint:', error)
+    setIsUrlAvailable(false)
+  }
+}
+
+export const percentageStringFormat = (x: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+  }).format(x)
+}
+
 export const capitalizeFirstWithoutHashes = (_string: string) => {
   let tmp = _string.split('-').join(' ')
   tmp = tmp.split('_').join(' ')
@@ -373,6 +399,42 @@ export const _trim = (_var) => {
   } catch {
     return ''
   }
+}
+
+export const fallbackCopyTextToClipboard = (text) => {
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+
+  textArea.style.position = 'fixed'
+  textArea.style.top = '0px'
+  textArea.style.left = '0px'
+  textArea.style.opacity = '0'
+  textArea.style.pointerEvents = 'none'
+  textArea.style.zIndex = '-1'
+
+  document.body.appendChild(textArea)
+  textArea.focus()
+  textArea.select()
+
+  try {
+    const successful = document.execCommand('copy')
+    console.log('Fallback: Copying was ' + (successful ? 'successful' : 'unsuccessful'))
+  } catch (err) {
+    console.error('Fallback: Copy command failed', err)
+  }
+
+  document.body.removeChild(textArea)
+}
+
+export const isNotEmptyString = (_input) => {
+  if (typeof _input === 'string' && _input.trim() !== '') {
+    return true
+  }
+  return false
+}
+
+export const removeExtension = (filename: string, extension: string) => {
+  return filename.endsWith(extension) ? filename.slice(0, -extension.length) : filename
 }
 
 export const logObject = (obj) => {

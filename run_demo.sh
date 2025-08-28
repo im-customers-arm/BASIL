@@ -14,6 +14,7 @@ TITLE_COLOR_STR="\033[0;92;40m"
 BODY_COLOR_STR="\033[0;97;40m"
 ALERT_COLOR_STR="\033[0;31;40m"
 RESET_COLORS_STR="\033[0m"
+TAG=$(git describe --tags | sed 's/-/_/g')
 
 usage()
 {
@@ -22,21 +23,20 @@ usage()
         BASIL Deployment script
 
         usage: ${0##*/} [ -b API_PORT ] [ -u URL ] [ -f APP_PORT ] [ -p ADMIN_PASSWRORD ]
-        
         -b API_PORT         Api (backend) port
         -d API_DISTRO       Distro used to deploy the api 'fedora' or 'debian', default is 'fedora'
                             That will be also the default distro used in BASIL test infrastructure when
                             user select Container as target test environment
         -e ENV_FILE         Filepath of an environment file you want to inject into the API Container
-        -f APP_PORT         App (frontend) port                        
+        -f APP_PORT         App (frontend) port
         -p ADMIN_PASSWRORD  Admin user default password (username: admin)
                             use single quote around your password
         -u URL              Full base url
                             - http://localhost if you want to evaluate it on your machine
-                            - http://<ip address> if you want to use a centralized machine 
+                            - http://<ip address> if you want to use a centralized machine
                             in the local network (e.g.: http://192.168.1.15)
-        
-        example: ${0##*/} -b 5005 -u 'http://192.168.1.15' -f 9005 -p '!myStrongPasswordForAdmin!'
+
+        example: ${0##*/} -b 5005 -m phi3.5 -u 'http://192.168.1.15' -f 9005 -p '!myStrongPasswordForAdmin!'
 
         BASIL (frontend) will be available at [URL][APP_PORT] e.g. http://192.168.1.15:9005
         BASIL Api (backend) will be available at [URL][API_PORT] e.g. http://192.168.1.15:5005
@@ -58,8 +58,8 @@ while getopts ${OPTSTRING} opt; do
         fi
         ;;
         e)
-	environment_file=${OPTARG}
-	;;
+        environment_file=${OPTARG}
+        ;;
         f)
         app_port=${OPTARG}
         ;;
@@ -90,6 +90,7 @@ echo -e " - api port = ${api_port}"
 echo -e " - app port = ${app_port}"
 echo -e " - admin pw = ${admin_pw}"
 echo -e " - environment file = ${environment_file:=''}"
+echo -e " - tag = ${TAG}"
 
 echo -e "\n${TITLE_COLOR_STR}"
 echo -e "###################################################################"
@@ -101,7 +102,7 @@ podman build \
     --build-arg="ADMIN_PASSWORD=${admin_pw}" \
     --build-arg="API_PORT=${api_port}" \
     -f ${api_containerfile} \
-    -t basil-api-image .
+    -t basil-api-image:${TAG} .
 
 echo -e "\n${TITLE_COLOR_STR}"
 echo -e "###################################################################"
@@ -113,7 +114,7 @@ podman build \
     --build-arg="API_ENDPOINT=${api_server_url}:${api_port}" \
     --build-arg="APP_PORT=${app_port}" \
     -f Containerfile-app \
-    -t basil-app-image .
+    -t basil-app-image:${TAG} .
 
 echo -e "\n${TITLE_COLOR_STR}"
 echo -e "###################################################################"
@@ -167,7 +168,7 @@ podman_cmd="$podman_cmd -v basil-db-vol:/BASIL-API/db/sqlite3"
 podman_cmd="$podman_cmd -v basil-ssh-keys-vol:/BASIL-API/api/ssh_keys"
 podman_cmd="$podman_cmd -v basil-user-files-vol:/BASIL-API/api/user-files"
 podman_cmd="$podman_cmd -v basil-tmt-logs-vol:/var/tmp/tmt"
-podman_cmd="$podman_cmd basil-api-image"
+podman_cmd="$podman_cmd basil-api-image:${TAG}"
 
 $podman_cmd
 
@@ -178,9 +179,9 @@ echo -e "###################################################################"
 
 echo -e "\n${BODY_COLOR_STR}"
 podman run \
-    -d \
+    --detach \
     --network=host \
-    basil-app-image
+    basil-app-image:${TAG}
 
 echo -e "\n${TITLE_COLOR_STR}"
 echo -e "###################################################################"

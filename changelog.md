@@ -6,6 +6,19 @@
 - LAVA (Linaro Automated Validation Architecture) Test Run Pluing
 - Fix npm vulnerabilities
 - Extended to other browsers other than Chrome
+- Data Auto Refresh (Notification, Test Runs)
+- Email notification: support for SMTP_SSL and introduction of HTML template
+- Fix UI issues in mapping view for specifications with long lines
+- Fix bug on deletion of all the notifications
+- Uniform percentage values format
+- Expose user username instead of user email
+- Added test cases to the e2e suite
+- Added test cases to the api unit test suite
+- Send write permission requests from within the application
+- Added notification filters for software component owners and list of users
+- Add in-app AI suggestions using openai API
+- Support LAVA Test execution using a file from user files
+- Links to ELISA Discord
 
 ## 1.6.x
 
